@@ -1,0 +1,3 @@
+FLASK_APP=news.py
+FLASK_DEBUG=1
+SECRET_KEY="WIcjxjs?YbEBg@!&"
