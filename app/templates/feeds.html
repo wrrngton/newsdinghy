@@ -19,4 +19,16 @@
 
 {% endwith %}
 
+<h2>Existing feeds</h2>
+
+<ul>
+
+{% for feed in user_feeds %}
+
+  <li><a href="{{ feed.url }}">{{ feed.url }}</a> - {{ feed.author }}</li>
+
+{% endfor %}
+
+</ul>
+
 {% endblock %}
