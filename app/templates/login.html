@@ -5,7 +5,9 @@
 <form action="/login" method="post">
     <input type="text" name="username" />
     <input type="password" name="password" />
+    <input type="checkbox" name="remember-me"/>
     <button type="submit">Submit</button>
 </form>
+{% include 'messages.html' %}
 
 {% endblock %}

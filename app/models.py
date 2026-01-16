@@ -6,7 +6,8 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db, login
 
-@login.user_loader(id)
+
+@login.user_loader
 def load_user(id):
     return db.session.get(User, int(id))
 
@@ -22,7 +23,7 @@ class User(UserMixin, db.Model):
         back_populates='user')
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='pbkdf2')
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -42,6 +43,21 @@ class Feed(db.Model):
     user_id: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey(User.id), index=True)
     user: so.Mapped[User] = so.relationship(back_populates='feeds')
+    articles: so.WriteOnlyMapped['Article'] = so.relationship(
+        back_populates='feed')
 
     def __repr__(self):
         return '<Feed {}>'.format(self.url)
+
+
+class Article(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    url: so.Mapped[str] = so.mapped_column(sa.String(64))
+    title: so.Mapped[str] = so.mapped_column(sa.String(64))
+    timestamp: so.Mapped[datetime] = so.mapped_column(index=True)
+    feed_id: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey(Feed.id), index=True)
+    feed: so.Mapped[Feed] = so.relationship(back_populates='articles')
+
+    def __repr__(self):
+        return '<Article {}>'.format(self.title)

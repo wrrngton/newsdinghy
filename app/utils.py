@@ -18,30 +18,33 @@ def generate_soup(url: str) -> str:
     status_code = res.status_code
 
     if status_code != 200:
-        return False
+        return False, 'Could not fetch feed url when processing articles'
 
     html = res.text
     soup = BeautifulSoup(html, 'xml')
 
-    return soup
+    return soup, 'Success'
 
 
-def get_feed_articles(soup: classmethod) -> dict:
+def process_feed_articles(feed_url: str) -> dict:
+    soup, message = generate_soup(feed_url)
+
+    if not soup:
+        return False, message
+
     articles = soup.find_all('item')
 
     articles_json = [
         {
             "title": a.find('title').string,
-            "author": a.find('dc:creator').string,
             "description": a.find('description').string,
             "timestamp": a.find('pubDate').string,
             "url": a.find('guid').string,
-
         }
         for a in articles
     ]
 
-    return articles_json
+    return articles_json, message
 
 
 def get_feed_info(soup: classmethod) -> dict:
