@@ -4,6 +4,15 @@
     <h2>
     Hey, {{ current_user.username }}, here's your news:
     </h2>
-
     {% endif %}
+
+    <ul>
+        
+        {% for a in user_articles %}
+
+        <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a></li>
+
+        {% endfor %}
+
+    </ul>
 {% endblock %}

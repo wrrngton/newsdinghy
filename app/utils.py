@@ -2,6 +2,7 @@ import datetime
 import requests
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from email.utils import parsedate_to_datetime
 
 
 def is_url_rss(soup: str) -> bool:
@@ -38,7 +39,7 @@ def process_feed_articles(feed_url: str) -> dict:
         {
             "title": a.find('title').string,
             "description": a.find('description').string,
-            "timestamp": a.find('pubDate').string,
+            "timestamp": convert_timestamp_to_utc(a.find('pubDate').string),
             "url": a.find('guid').string,
         }
         for a in articles
@@ -64,3 +65,7 @@ def get_feed_info(soup: classmethod) -> dict:
     }
 
     return feed_json
+
+def convert_timestamp_to_utc(tstamp: str) -> str:
+    return parsedate_to_datetime(tstamp)
+

@@ -1,0 +1,15 @@
+/* Utilities */
+
+.none {
+  display: none;
+}
+
+/* Feeds.html */
+
+.feed-delete {
+  display: none;
+}
+
+.feeds li:hover .feed-delete {
+  display: inline-block;
+}

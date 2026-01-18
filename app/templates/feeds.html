@@ -11,11 +11,17 @@
 
 <h2>Existing feeds</h2>
 
-<ul>
+<ul class="feeds" id="feeds">
 {% if user_feeds %}
 {% for feed in user_feeds %}
 
-  <li><a href="{{ feed.url }}">{{ feed.url }}</a> - {{ feed.author }}</li>
+<li>
+  <form action="/delete-feed" method="POST">
+    <a href="{{ feed.url }}">{{ feed.url }}</a> - {{ feed.author }}
+    <input type="text" class="none" name="feed-id" value="{{ feed.id }}" />
+    <button class="feed-delete">Delete feed</button>
+  </form>
+</li>
 
 {% endfor %}
 

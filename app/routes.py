@@ -2,8 +2,9 @@ from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.utils import is_url_rss, get_feed_info, generate_soup, process_feed_articles
-from app.database_operations import get_user_feeds, index_feed_articles
+from app.database_operations import get_user_feeds, index_feed_articles, delete_user_feed, add_user_feed, get_user_articles
 from app.models import Feed, User
+from app.errors import DatabaseError, DataValidationError
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
@@ -12,9 +13,8 @@ from sqlalchemy.exc import IntegrityError
 @app.route('/index')
 @login_required
 def index():
-    user_feeds = get_user_feeds(current_user.id)
-    # get_feeds_articles(user_feeds)
-    return render_template('index.html', title='Home', user=current_user)
+    user_articles = get_user_articles(current_user.id)
+    return render_template('index.html', title='Home', user=current_user, user_articles=user_articles)
 
 
 @app.route('/feeds')
@@ -80,26 +80,36 @@ def handle_form():
     feed = get_feed_info(soup)
 
     try:
-        db_feed = Feed(url=feed.get('url'), user_id=1, author=feed.get(
-            'author'), description=feed.get('description'), website=feed.get('website'))
-
-        db.session.add(db_feed)
-        db.session.commit()
-
-    except IntegrityError as e:
-        db.session.rollback()
-        flash(f'The following error occurred: {e.orig}')
-        return redirect(url_for('feeds'))
-
-    except Exception as e:
-        db.session.rollback()
-        flash(f'The following error occurred: {e.orig}')
-        return redirect(url_for('feeds'))
+        add_user_feed(feed)
+        flash('Feed successfully added')
+    except DatabaseError as e:
+        flash(str(e))
+    except DataValidationError as e:
+        flash(str(e))
 
     articles_json, message = process_feed_articles(url)
 
     if not articles_json:
         flash(message)
-        return redirect(url_for('feeds'))
 
+    try:
+        index_feed_articles(articles_json, url)
+        flash('Articles successfully indexed')
+    except DatabaseError as e:
+        flash(str(e))
+    except DataValidationError as e:
+        flash(str(e))
+
+    return redirect(url_for('feeds'))
+
+
+@app.route('/delete-feed', methods=['POST'])
+def delete_feed():
+    try:
+        feed_id = request.form.get('feed-id')
+        delete_user_feed(feed_id)
+    except DatabaseError as e:
+        flash(e)
+    except DataValidationError as e:
+        flash(e)
     return redirect(url_for('feeds'))
