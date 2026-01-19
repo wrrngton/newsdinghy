@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'messages.html' %}
+  {% if single_feed_articles %}
+  <h2>{{  }}</h2>
+    <ul>
+    {% for a in single_feed %}
+      <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a></li>
+    {% endfor %}
+    </ul>
+      
+  {% endif %}
+
+{% endblock %}

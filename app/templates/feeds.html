@@ -11,8 +11,8 @@
 
 <h2>Existing feeds</h2>
 
-<ul class="feeds" id="feeds">
 {% if user_feeds %}
+<ul class="feeds" id="feeds">
 {% for feed in user_feeds %}
 
 <li>
@@ -24,6 +24,7 @@
 </li>
 
 {% endfor %}
+</ul>
 
 {% else %}
 
@@ -31,6 +32,5 @@
 
 {% endif %}
 
-</ul>
 
 {% endblock %}

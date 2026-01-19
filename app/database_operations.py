@@ -11,10 +11,32 @@ def get_user_feeds(user: int) -> list:
     user_feeds = db.session.scalars(feeds_query).all()
     return user_feeds
 
+def get_single_feed(feed_id: int, user: int) -> list:
+    feed_query = current_user.feeds.select().where(Feed.id == feed_id)
+    user_has_feed_access = db.session.scalar(feed_query)
+
+    if not user_has_feed_access:
+        raise DataValidationError("You don't have access to such a feed")
+
+    try:
+        feed_articles = db.session.scalars(sa.select(Article).where(Article.feed_id == feed_id)).all()
+    except IntegrityError as e:
+        db.session.rollback()
+        raise DataValidationError(
+            "The requested resouces to delete have an error.")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseError(
+            "A technical error occurred while deleting from the database")
+
+    return feed_articles
+
 
 def get_user_articles(user: int) -> list:
     try:
         user_feeds = get_user_feeds(user)
+        user_feed_info = [{"feed_id": u.id, "feed_website": u.website,
+                           "feed_description": u.description} for u in user_feeds]
         user_feed_ids = [u.id for u in user_feeds]
         user_articles = db.session.scalars(sa.select(Article).filter(
             Article.feed_id.in_(user_feed_ids))).all()

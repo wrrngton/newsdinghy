@@ -6,13 +6,20 @@
     </h2>
     {% endif %}
 
+      {% if user_feeds %}
     <ul>
         
-        {% for a in user_articles %}
+        {% for f in user_feeds %}
 
-        <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a></li>
+        <li><a href="/feeds/{{ f.id }}">{{ f.description }}</a></li>
 
         {% endfor %}
-
     </ul>
+
+        {% else %}
+
+        <p>No articles yet, try adding some <a href="/feeds">feeds</a></p>
+
+      {% endif %}
+
 {% endblock %}
