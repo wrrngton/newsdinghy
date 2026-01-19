@@ -6,7 +6,7 @@
   {% if single_feed_articles %}
     <ul>
     {% for a in single_feed_articles %}
-      <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a></li>
+    <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a> - <i>{{ a.pretty_time }}</i></li>
     {% endfor %}
     </ul>
       

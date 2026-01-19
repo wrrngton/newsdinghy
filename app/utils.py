@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import requests
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -66,6 +66,11 @@ def get_feed_info(soup: classmethod) -> dict:
 
     return feed_json
 
+
 def convert_timestamp_to_utc(tstamp: str) -> str:
     return parsedate_to_datetime(tstamp)
 
+
+def convert_db_utc_to_date(tstamp: str) -> str:
+    dt_obj = datetime.fromisoformat(tstamp)
+    return f"{dt_obj.day} - {dt_obj.month} - {dt_obj.year}"

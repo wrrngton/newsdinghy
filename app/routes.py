@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.utils import is_url_rss, get_feed_info, generate_soup, process_feed_articles
+from app.utils import is_url_rss, get_feed_info, generate_soup, process_feed_articles, convert_db_utc_to_date
 from app.database_operations import get_user_feeds, index_feed_articles, delete_user_feed, add_user_feed, get_user_articles, get_single_feed_articles, get_single_user_feed, get_single_feed_article_count
 from app.models import Feed, User
 from app.errors import DatabaseError, DataValidationError
@@ -33,6 +33,9 @@ def single_feed(feed_id):
     try:
         single_feed_articles = get_single_feed_articles(
             feed_id, current_user.id)
+        for sfa in single_feed_articles:
+            sfa.pretty_time = str(sfa.timestamp).split(' ')[0]
+        print(single_feed_articles)
         single_feed_info = get_single_user_feed(current_user.id, feed_id)
         return render_template('single_feed.html', single_feed_articles=single_feed_articles, single_feed_info=single_feed_info)
     except DataValidationError as e:
