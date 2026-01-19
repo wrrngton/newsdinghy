@@ -2,10 +2,10 @@
 
 {% block content %}
 {% include 'messages.html' %}
+ <h2>{{ single_feed_info.description }}</h2>
   {% if single_feed_articles %}
-  <h2>{{  }}</h2>
     <ul>
-    {% for a in single_feed %}
+    {% for a in single_feed_articles %}
       <li><a href="{{ a.url }}" target="_blank">{{ a.title }}</a></li>
     {% endfor %}
     </ul>

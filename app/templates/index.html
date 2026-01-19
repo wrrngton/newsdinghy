@@ -11,7 +11,7 @@
         
         {% for f in user_feeds %}
 
-        <li><a href="/feeds/{{ f.id }}">{{ f.description }}</a></li>
+        <li><a href="/feeds/{{ f.id }}">{{ f.description }}</a> ({{ f.count }})</li>
 
         {% endfor %}
     </ul>

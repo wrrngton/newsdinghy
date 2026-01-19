@@ -3,6 +3,7 @@ from app.models import User, Feed, Article, user_feeds
 from app.errors import DatabaseError, ResourceNotFoundError, DataValidationError
 from flask_login import current_user
 import sqlalchemy as sa
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 
@@ -11,7 +12,31 @@ def get_user_feeds(user: int) -> list:
     user_feeds = db.session.scalars(feeds_query).all()
     return user_feeds
 
-def get_single_feed(feed_id: int, user: int) -> list:
+
+def get_single_user_feed(user: int, feed_id: int) -> Feed:
+    try:
+        single_feed_query = current_user.feeds.select().where(Feed.id == feed_id)
+        single_feed = db.session.scalar(single_feed_query)
+    except IntegrityError as e:
+        db.session.rollback()
+        raise DataValidationError(
+            "The requested resouces to delete have an error.")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseError(
+            "A technical error occurred while deleting from the database")
+    return single_feed
+
+
+def get_single_feed_article_count(feed_id: int) -> int:
+    article_count = db.session.scalar(
+        sa.select(func.count()).select_from(
+            Article).where(Article.feed_id == feed_id)
+    )
+    return article_count
+
+
+def get_single_feed_articles(feed_id: int, user: int) -> list:
     feed_query = current_user.feeds.select().where(Feed.id == feed_id)
     user_has_feed_access = db.session.scalar(feed_query)
 
@@ -19,7 +44,8 @@ def get_single_feed(feed_id: int, user: int) -> list:
         raise DataValidationError("You don't have access to such a feed")
 
     try:
-        feed_articles = db.session.scalars(sa.select(Article).where(Article.feed_id == feed_id)).all()
+        feed_articles = db.session.scalars(
+            sa.select(Article).where(Article.feed_id == feed_id)).all()
     except IntegrityError as e:
         db.session.rollback()
         raise DataValidationError(

@@ -2,7 +2,7 @@ from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.utils import is_url_rss, get_feed_info, generate_soup, process_feed_articles
-from app.database_operations import get_user_feeds, index_feed_articles, delete_user_feed, add_user_feed, get_user_articles, get_single_feed
+from app.database_operations import get_user_feeds, index_feed_articles, delete_user_feed, add_user_feed, get_user_articles, get_single_feed_articles, get_single_user_feed, get_single_feed_article_count
 from app.models import Feed, User
 from app.errors import DatabaseError, DataValidationError
 import sqlalchemy as sa
@@ -14,6 +14,8 @@ from sqlalchemy.exc import IntegrityError
 @login_required
 def index():
     user_feeds = get_user_feeds(current_user.id)
+    for uf in user_feeds:
+        uf.count = get_single_feed_article_count(uf.id)
     return render_template('index.html', title='Home', user=current_user, user_feeds=user_feeds)
 
 
@@ -23,13 +25,16 @@ def feeds():
     user_feeds = get_user_feeds(current_user.id)
     return render_template('feeds.html', title='Settings', user_feeds=user_feeds)
 
+
 @app.route('/feeds/<feed_id>', methods=['GET'])
 @login_required
 def single_feed(feed_id):
     single_feed_articles = False
     try:
-        single_feed_articles = get_single_feed(feed_id, current_user.id)
-        return render_template('single_feed.html', single_feed=single_feed_articles)
+        single_feed_articles = get_single_feed_articles(
+            feed_id, current_user.id)
+        single_feed_info = get_single_user_feed(current_user.id, feed_id)
+        return render_template('single_feed.html', single_feed_articles=single_feed_articles, single_feed_info=single_feed_info)
     except DataValidationError as e:
         flash(str(e))
         return redirect(url_for('feeds'))
